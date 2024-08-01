@@ -230,12 +230,35 @@ def convert_pdf_to_images_with_pymupdf(pdf_path, output_folder, zoom_x=2.0, zoom
 def txt_to_image(txt_file):
     with open(txt_file, 'r') as f:
         text = f.read()
+    
     # Create a new image with higher resolution
-    image = Image.new('RGB', (1600, 1200), color=(255, 255, 255))
+    image_width = 1600
+    image_height = 1200
+    image = Image.new('RGB', (image_width, image_height), color=(255, 255, 255))
     draw = ImageDraw.Draw(image)
-    # Use default font instead of a specific TTF font
-    font = ImageFont.load_default()
-    draw.text((10, 10), text, font=font, fill=(0, 0, 0))
+
+    # Use a specific TrueType font if available
+    try:
+        font_path = "arial.ttf"  # Adjust the path to the TTF file if necessary
+        font = ImageFont.truetype(font_path, 24)  # Increase font size for better readability
+    except IOError:
+        font = ImageFont.load_default()  # Fallback to default font if TTF not available
+
+    # Set initial position for the text
+    x, y = 10, 10
+    line_height = font.getsize("hg")[1] + 5  # Calculate line height based on font size
+
+    # Split text into lines for wrapping
+    for line in text.splitlines():
+        # Wrap text if it's too long
+        while draw.textsize(line, font=font)[0] > image_width - 20:
+            line = line[:-1]  # Remove last character and try again
+        draw.text((x, y), line, font=font, fill=(0, 0, 0))
+        y += line_height
+
+        # Check if the text exceeds the image height
+        if y + line_height > image_height:
+            break  # Stop drawing if we exceed the height
     return image
 
 def docx_to_image(docx_file):
