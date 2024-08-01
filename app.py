@@ -159,6 +159,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from PIL import Image, ImageDraw, ImageFont
 import os, fitz
 import json, time
+from docx import Document
 from docx2pdf import convert as docx2pdf_convert 
 
 os.environ["GOOGLE_API_KEY"] = 'AIzaSyBbepUh8x3CqpkxNFnJ1IX0dFc0UNTwwbU'
@@ -247,12 +248,19 @@ def txt_to_image(txt_file):
     return image
 
 def docx_to_image(docx_file):
-    # Convert DOCX to PDF
+    # Try to convert DOCX to PDF using docx2pdf
     pdf_file = docx_file.replace('.docx', '.pdf')
-    docx2pdf_convert(docx_file, pdf_file)
-
-    # Convert PDF to images using PyMuPDF
-    return convert_pdf_to_images_with_pymupdf(pdf_file, os.path.dirname(docx_file))
+    
+    try:
+        docx2pdf.convert(docx_file, pdf_file)
+        # Convert PDF to images using PyMuPDF
+        return convert_pdf_to_images_with_pymupdf(pdf_file, os.path.dirname(docx_file))
+    except NotImplementedError as e:
+        st.error(f"Error converting DOCX to PDF: {str(e)}")
+        return []
+    except Exception as e:
+        st.error(f"An unexpected error occurred: {str(e)}")
+        return []
 
 def combine_images(images):
     widths, heights = zip(*(i.size for i in images))
