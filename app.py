@@ -160,7 +160,7 @@ from PIL import Image, ImageDraw, ImageFont
 import os, fitz
 import json, time
 from docx import Document
-import pypandoc
+import subprocess
 
 os.environ["GOOGLE_API_KEY"] = 'AIzaSyBbepUh8x3CqpkxNFnJ1IX0dFc0UNTwwbU'
 
@@ -248,14 +248,17 @@ def txt_to_image(txt_file):
     return image
 
 def docx_to_image(docx_file):
-    # Convert DOCX to PDF using pypandoc
+    # Convert DOCX to PDF using LibreOffice
     pdf_file = docx_file.replace('.docx', '.pdf')
     try:
-        pypandoc.convert_file(docx_file, 'pdf', outputfile=pdf_file)
+        subprocess.run(['libreoffice', '--headless', '--convert-to', 'pdf', docx_file], check=True)
         # Convert PDF to images using PyMuPDF
         return convert_pdf_to_images_with_pymupdf(pdf_file, os.path.dirname(docx_file))
+    except subprocess.CalledProcessError as e:
+        st.error(f"Error converting DOCX to PDF: {str(e)}")
+        return []
     except Exception as e:
-        st.error(f"An unexpected error occurred during DOCX to PDF conversion: {str(e)}")
+        st.error(f"An unexpected error occurred: {str(e)}")
         return []
 
 def combine_images(images):
