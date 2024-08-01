@@ -237,18 +237,23 @@ def txt_to_image(txt_file):
     image = Image.new('RGB', (image_width, image_height), color=(255, 255, 255))
     draw = ImageDraw.Draw(image)
 
-    # Use a specific TrueType font if available
+    # Try to use a TrueType font if available, fallback to default font
     try:
-        font_path = "arial.ttf"  # Adjust the path to the TTF file if necessary
+        font_path = "arial.ttf"  # Adjust this path to your font file if necessary
         font = ImageFont.truetype(font_path, 24)  # Increase font size for better readability
-    except IOError:
+    except Exception as e:
+        print(f"Could not load font: {e}. Using default font.")
         font = ImageFont.load_default()  # Fallback to default font if TTF not available
 
     # Set initial position for the text
     x, y = 10, 10
 
-    # Calculate line height based on font size
-    line_height = draw.textsize("hg", font=font)[1] + 5  # Use draw.textsize instead of font.getsize
+    # Get line height using the font
+    try:
+        line_height = draw.textsize("hg", font=font)[1] + 5  # Calculate line height based on font size
+    except Exception as e:
+        print(f"Error calculating text size: {e}. Using default height of 20.")
+        line_height = 20  # Default line height
 
     # Split text into lines for wrapping
     for line in text.splitlines():
