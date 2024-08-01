@@ -230,43 +230,20 @@ def convert_pdf_to_images_with_pymupdf(pdf_path, output_folder, zoom_x=2.0, zoom
 def txt_to_image(txt_file):
     with open(txt_file, 'r') as f:
         text = f.read()
-
+    
     # Create a new image with higher resolution
-    image_width = 1600
-    image_height = 1200
-    image = Image.new('RGB', (image_width, image_height), color=(255, 255, 255))
+    image = Image.new('RGB', (1600, 1200), color=(255, 255, 255))
     draw = ImageDraw.Draw(image)
 
-    # Try to use a TrueType font if available, fallback to default font
+    # Try to use a TrueType font first
     try:
-        font_path = "arial.ttf"  # Adjust this path to your font file if necessary
-        font = ImageFont.truetype(font_path, 24)  # Increase font size for better readability
-    except Exception as e:
-        print(f"Could not load font: {e}. Using default font.")
-        font = ImageFont.load_default()  # Fallback to default font if TTF not available
+        font = ImageFont.truetype("arial.ttf", 24)  # Attempt to load the Arial font
+    except IOError:
+        font = ImageFont.load_default()  # Fall back to the default font if Arial is not found
 
-    # Set initial position for the text
-    x, y = 10, 10
-
-    # Get line height using the font
-    try:
-        line_height = draw.textsize("hg", font=font)[1] + 5  # Calculate line height based on font size
-    except Exception as e:
-        print(f"Error calculating text size: {e}. Using default height of 20.")
-        line_height = 20  # Default line height
-
-    # Split text into lines for wrapping
-    for line in text.splitlines():
-        # Wrap text if it's too long
-        while draw.textsize(line, font=font)[0] > image_width - 20:
-            line = line[:-1]  # Remove last character and try again
-        draw.text((x, y), line, font=font, fill=(0, 0, 0))
-        y += line_height
-
-        # Check if the text exceeds the image height
-        if y + line_height > image_height:
-            break  # Stop drawing if we exceed the height
-
+    # Draw the text on the image
+    draw.text((10, 10), text, font=font, fill=(0, 0, 0))
+    
     return image
 
 def docx_to_image(docx_file):
