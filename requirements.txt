@@ -1,4 +1,4 @@
-PyMuPDF
-﻿Pillow
 langchain-core
 langchain-google-genai
+Pillow
+PyMuPDF
