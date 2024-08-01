@@ -160,7 +160,7 @@ from PIL import Image, ImageDraw, ImageFont
 import os, fitz
 import json, time
 from docx import Document
-from docx2pdf import convert as docx2pdf
+from docx2pdf import convert  # This imports the function directly
 
 os.environ["GOOGLE_API_KEY"] = 'AIzaSyBbepUh8x3CqpkxNFnJ1IX0dFc0UNTwwbU'
 
@@ -248,11 +248,11 @@ def txt_to_image(txt_file):
     return image
 
 def docx_to_image(docx_file):
-    # Try to convert DOCX to PDF using docx2pdf
+    # Convert DOCX to PDF
     pdf_file = docx_file.replace('.docx', '.pdf')
     
     try:
-        docx2pdf.convert(docx_file, pdf_file)
+        convert(docx_file, pdf_file)  # Call the convert function correctly
         # Convert PDF to images using PyMuPDF
         return convert_pdf_to_images_with_pymupdf(pdf_file, os.path.dirname(docx_file))
     except NotImplementedError as e:
