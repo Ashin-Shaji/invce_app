@@ -54,11 +54,11 @@ def main():
     if 'json_outputs' not in st.session_state:
         st.session_state.json_outputs = {}
 
-    invoices_dir = '/tmp/invoices/'
+    invoice_dir = '/tmp/invoices/'
 
     # Create the directory if it doesn't exist
-    if not os.path.exists(invoices_dir):
-        os.makedirs(invoices_dir)
+    if not os.path.exists(invoice_dir):
+        os.makedirs(invoice_dir)
 
     if option == "Upload Invoice Images or PDFs":
         uploaded_files = st.file_uploader("Choose images or PDFs...", type=["jpg", "jpeg", "png", "pdf"], accept_multiple_files=True)
