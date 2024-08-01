@@ -160,7 +160,7 @@ from PIL import Image, ImageDraw, ImageFont
 import os, fitz
 import json, time
 from docx import Document
-from docx2pdf import convert as docx2pdf_convert 
+from docx2pdf import convert as docx2pdf
 
 os.environ["GOOGLE_API_KEY"] = 'AIzaSyBbepUh8x3CqpkxNFnJ1IX0dFc0UNTwwbU'
 
