@@ -15,6 +15,32 @@ st.markdown("""<style>
             margin: 0 auto;}</style>
         """, unsafe_allow_html=True) 
 
+# Custom CSS to display radio options
+st.markdown("""
+    <style>
+    div[role="radiogroup"] > label > div {
+        display: flex;
+        flex-direction: row;
+    }
+    div[role="radiogroup"] > label > div > div {
+        margin-right: 10px;
+    }
+    </style>
+    <style>
+    div[role="radiogroup"] {
+        display: flex;
+        flex-direction: row;
+    }
+    div[role="radiogroup"] > label {
+        margin-right: 20px;
+    }
+    input[type="radio"]:div {
+        background-color: white;
+        border-color: lightblue;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 def process_invoice(image_path):
     message = HumanMessage(
         content=[
