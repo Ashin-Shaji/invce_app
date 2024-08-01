@@ -1,7 +1,4 @@
 PyMuPDF
 ﻿Pillow
-pandas
-google-generativeai
 langchain-core
 langchain-google-genai
-streamlit
