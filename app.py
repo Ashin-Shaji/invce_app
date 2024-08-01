@@ -160,7 +160,6 @@ from PIL import Image, ImageDraw, ImageFont
 import os, fitz
 import json, time
 from docx import Document
-import subprocess
 
 os.environ["GOOGLE_API_KEY"] = 'AIzaSyBbepUh8x3CqpkxNFnJ1IX0dFc0UNTwwbU'
 
