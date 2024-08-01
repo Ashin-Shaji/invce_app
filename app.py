@@ -49,13 +49,16 @@ def main():
 
     option = st.radio(
         "Select an option:",
-        ("Upload Invoice Images or PDFs", "Select Existing Images")
-    )
+        ("Upload Invoice Images or PDFs", "Select Existing Images"))
 
     if 'json_outputs' not in st.session_state:
         st.session_state.json_outputs = {}
 
-    invoice_dir = "C:\\Users\\Hp\\Downloads\\jupyter -whats\\invoices\\"
+    invoices_dir = '/tmp/invoices/'
+
+    # Create the directory if it doesn't exist
+    if not os.path.exists(invoices_dir):
+        os.makedirs(invoices_dir)
 
     if option == "Upload Invoice Images or PDFs":
         uploaded_files = st.file_uploader("Choose images or PDFs...", type=["jpg", "jpeg", "png", "pdf"], accept_multiple_files=True)
