@@ -233,8 +233,8 @@ def txt_to_image(txt_file):
     # Create a new image with higher resolution
     image = Image.new('RGB', (1600, 1200), color=(255, 255, 255))
     draw = ImageDraw.Draw(image)
-    # Use a truetype font for better quality
-    font = ImageFont.truetype("arial.ttf", 20)
+    # Use default font instead of a specific TTF font
+    font = ImageFont.load_default()
     draw.text((10, 10), text, font=font, fill=(0, 0, 0))
     return image
 
