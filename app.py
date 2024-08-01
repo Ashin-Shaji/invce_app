@@ -230,7 +230,7 @@ def convert_pdf_to_images_with_pymupdf(pdf_path, output_folder, zoom_x=2.0, zoom
 def txt_to_image(txt_file):
     with open(txt_file, 'r') as f:
         text = f.read()
-    
+
     # Create a new image with higher resolution
     image_width = 1600
     image_height = 1200
@@ -246,7 +246,9 @@ def txt_to_image(txt_file):
 
     # Set initial position for the text
     x, y = 10, 10
-    line_height = font.getsize("hg")[1] + 5  # Calculate line height based on font size
+
+    # Calculate line height based on font size
+    line_height = draw.textsize("hg", font=font)[1] + 5  # Use draw.textsize instead of font.getsize
 
     # Split text into lines for wrapping
     for line in text.splitlines():
@@ -259,6 +261,7 @@ def txt_to_image(txt_file):
         # Check if the text exceeds the image height
         if y + line_height > image_height:
             break  # Stop drawing if we exceed the height
+
     return image
 
 def docx_to_image(docx_file):
