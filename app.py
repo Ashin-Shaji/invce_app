@@ -45,7 +45,7 @@ def convert_pdf_to_images_with_pymupdf(pdf_path, output_folder, zoom_x=2.0, zoom
     return image_paths
 
 def main():
-    st.title("Invoice Processor")
+    st.title("Invoice Data Analyzer")
 
     option = st.radio(
         "Select an option:",
