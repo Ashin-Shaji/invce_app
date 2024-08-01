@@ -3,5 +3,5 @@ langchain-google-genai
 Pillow
 PyMuPDF
 python-docx 
-docx2pdf 
+pypandoc
 pdf2image
