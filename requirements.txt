@@ -4,3 +4,4 @@ Pillow
 PyMuPDF
 python-docx 
 pdf2image
+libreoffice
