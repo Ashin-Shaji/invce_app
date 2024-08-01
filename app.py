@@ -164,7 +164,7 @@ from docx import Document
 os.environ["GOOGLE_API_KEY"] = 'AIzaSyBbepUh8x3CqpkxNFnJ1IX0dFc0UNTwwbU'
 
 # Initialize the ChatGoogleGenerativeAI model
-llm = ChatGoogleGenerativeAI(model="gemini-1.5-pro-latest")
+llm = ChatGoogleGenerativeAI(model="gemini-1.5-pro")
 
 st.markdown("""<style>
         .stButton > button {
