@@ -381,7 +381,6 @@ from PIL import Image, ImageDraw, ImageFont
 import os, fitz
 import json, time
 from docx import Document
-import docx2pdf
 import io
 
 os.environ["GOOGLE_API_KEY"] = 'AIzaSyBbepUh8x3CqpkxNFnJ1IX0dFc0UNTwwbU'
@@ -447,15 +446,20 @@ def convert_pdf_to_images_with_pymupdf(pdf_path, zoom_x=2.0, zoom_y=2.0):
         images.append(img)
     return images
 
-def docx_to_image(docx_file):
-    # Convert DOCX to PDF
-    pdf_file = docx_file.replace('.docx', '.pdf')
-    docx2pdf.convert(docx_file, pdf_file)
+def docx_to_image(docx_file, custom_font_path=None):
+    # Load the DOCX file
+    document = Document(docx_file)
+    full_text = []
     
-    # Convert PDF to images using pymupdf
-    images = convert_pdf_to_images_with_pymupdf(pdf_file)
+    for para in document.paragraphs:
+        full_text.append(para.text)
+
+    text = "\n".join(full_text)
+
+    # Create an image from the text
+    image = txt_to_image(text, custom_font_path)
     
-    return images
+    return [image]  # Return a list of images, though here it's just one
 
 def combine_images(images):
     widths, heights = zip(*(i.size for i in images))
@@ -468,10 +472,7 @@ def combine_images(images):
         y_offset += img.height
     return combined_image
 
-def txt_to_image(txt_file, custom_font_path=None):
-    with open(txt_file, 'r') as f:
-        text = f.read()
-    
+def txt_to_image(text, custom_font_path=None):
     # Create a new image with higher resolution
     image = Image.new('RGB', (1600, 1200), color=(255, 255, 255))
     draw = ImageDraw.Draw(image)
@@ -546,11 +547,11 @@ def main():
                     docx_path = os.path.join(invoice_dir, uploaded_file.name)
                     with open(docx_path, "wb") as f:
                         f.write(uploaded_file.getbuffer())
-                    images = docx_to_image(docx_path)
-                    combined_image = combine_images(images)
-                    combined_image_path = os.path.join(invoice_dir, f"{os.path.splitext(uploaded_file.name)[0]}.png")
-                    combined_image.save(combined_image_path)
-                    st.image(combined_image_path, caption=os.path.basename(combined_image_path), use_column_width=True)
+                    images = docx_to_image(docx_path, custom_font_path)  # Pass the custom font path
+                    for image in images:
+                        image_path = os.path.join(invoice_dir, f"{os.path.splitext(uploaded_file.name)[0]}.png")
+                        image.save(image_path)
+                        st.image(image_path, caption=os.path.basename(image_path), use_column_width=True)
                 elif uploaded_file.name.endswith('.txt'):
                     txt_path = os.path.join(invoice_dir, uploaded_file.name)
                     with open(txt_path, "wb") as f:
@@ -576,13 +577,13 @@ def main():
                             st.session_state.json_outputs[os.path.basename(image_path)] = json_output
                     elif uploaded_file.name.endswith('.docx'):
                         docx_path = os.path.join(invoice_dir, uploaded_file.name)
-                        images = docx_to_image(docx_path)
-                        combined_image = combine_images(images)
-                        combined_image_path = os.path.join(invoice_dir, f"{os.path.splitext(uploaded_file.name)[0]}.png")
-                        combined_image.save(combined_image_path)
-                        output = process_invoice(combined_image_path)
-                        json_output = json.loads(output)
-                        st.session_state.json_outputs[os.path.basename(combined_image_path)] = json_output
+                        images = docx_to_image(docx_path, custom_font_path)
+                        for image in images:
+                            image_path = os.path.join(invoice_dir, f"{os.path.splitext(uploaded_file.name)[0]}.png")
+                            image.save(image_path)
+                            output = process_invoice(image_path)
+                            json_output = json.loads(output)
+                            st.session_state.json_outputs[os.path.basename(image_path)] = json_output
                     elif uploaded_file.name.endswith('.txt'):
                         txt_path = os.path.join(invoice_dir, uploaded_file.name)
                         image = txt_to_image(txt_path, custom_font_path)
@@ -607,7 +608,7 @@ def main():
                 image = Image.open(image_path)
                 st.image(image, caption=selected_image, use_column_width=True)
                 
-            if st.button("Process Selected Images"):
+            if st.button("Process All Selected Images"):
                 for selected_image in selected_images:
                     image_path = os.path.join(invoice_dir, selected_image)
                     output = process_invoice(image_path)
