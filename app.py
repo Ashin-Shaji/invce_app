@@ -465,7 +465,7 @@ def main():
         if existing_fonts:
             font_choice = st.radio("Choose a font", existing_fonts)
             custom_font_path = os.path.join(font_dir, font_choice)
-            st.write(f"Using selected custom font: {font_choice}")
+            st.write(f"Now using font: {font_choice}")
         
         uploaded_font = st.file_uploader("Upload .ttf for custom font", type=["ttf"])
         if uploaded_font:
