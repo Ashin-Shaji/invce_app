@@ -251,7 +251,7 @@ def main():
 
     option = st.radio(
         "Select an option:",
-        ("Upload Invoice Images, PDFs, TXT, or DOCX Files", "Select Existing Images"))
+        ("Upload Invoice Images, PDFs, TXT Files", "Select Existing Images"))
 
     if 'json_outputs' not in st.session_state:
         st.session_state.json_outputs = {}
