@@ -453,13 +453,22 @@ def main():
 
     use_custom_font = st.checkbox('Use different font')
 
-    custom_font_path = None
+    font_dir = '/tmp/fonts/'
+    if not os.path.exists(font_dir):
+        os.makedirs(font_dir)
+
+    existing_fonts = [f for f in os.listdir(font_dir) if f.endswith('.ttf')]
+    custom_font_path = existing_fonts[0] if existing_fonts else None
+
     if use_custom_font:
+        if custom_font_path:
+            st.write(f"Using existing custom font: {custom_font_path}")
         uploaded_font = st.file_uploader("Upload a .ttf file for custom font", type=["ttf"])
         if uploaded_font:
-            custom_font_path = os.path.join('/tmp', uploaded_font.name)
+            custom_font_path = os.path.join(font_dir, uploaded_font.name)
             with open(custom_font_path, "wb") as f:
                 f.write(uploaded_font.getbuffer())
+            st.write(f"Uploaded and using new custom font: {custom_font_path}")
 
     if 'json_outputs' not in st.session_state:
         st.session_state.json_outputs = {}
