@@ -246,34 +246,6 @@ def txt_to_image(txt_file):
     
     return image
 
-def docx_to_image(docx_file):
-    # Convert DOCX to PDF using LibreOffice
-    pdf_file = docx_file.replace('.docx', '.pdf')
-    try:
-        subprocess.run(['libreoffice', '--headless', '--convert-to', 'pdf', docx_file], check=True)
-        # Convert PDF to images using PyMuPDF
-        return convert_pdf_to_images_with_pymupdf(pdf_file, os.path.dirname(docx_file))
-    except subprocess.CalledProcessError as e:
-        st.error(f"Error converting DOCX to PDF: {str(e)}")
-        return []
-    except Exception as e:
-        st.error(f"An unexpected error occurred: {str(e)}")
-        return []
-
-def combine_images(images):
-    widths, heights = zip(*(i.size for i in images))
-    total_height = sum(heights)
-    max_width = max(widths)
-
-    combined_image = Image.new('RGB', (max_width, total_height))
-
-    y_offset = 0
-    for img in images:
-        combined_image.paste(img, (0, y_offset))
-        y_offset += img.height
-
-    return combined_image
-
 def main():
     st.title("Invoice Data Analyzer")
 
@@ -290,8 +262,8 @@ def main():
     if not os.path.exists(invoice_dir):
         os.makedirs(invoice_dir)
 
-    if option == "Upload Invoice Images, PDFs, TXT, or DOCX Files":
-        uploaded_files = st.file_uploader("Choose images, PDFs, TXT, or DOCX files...", type=["jpg", "jpeg", "png", "pdf", "txt", "docx"], accept_multiple_files=True)
+    if option == "Upload Invoice Images, PDFs, TXT Files":
+        uploaded_files = st.file_uploader("Choose images, PDFs, TXT files...", type=["jpg", "jpeg", "png", "pdf", "txt"], accept_multiple_files=True)
         if uploaded_files:
             for uploaded_file in uploaded_files:
                 if uploaded_file.name.endswith('.pdf'):
@@ -310,15 +282,6 @@ def main():
                     image_path = os.path.join(invoice_dir, f"{os.path.splitext(uploaded_file.name)[0]}.png")
                     image.save(image_path)
                     st.image(image, caption=os.path.basename(image_path), use_column_width=True)
-                elif uploaded_file.name.endswith('.docx'):
-                    docx_path = os.path.join(invoice_dir, uploaded_file.name)
-                    with open(docx_path, "wb") as f:
-                        f.write(uploaded_file.getbuffer())
-                    images = docx_to_image(docx_path)
-                    combined_image = combine_images([Image.open(img) for img in images])
-                    image_path = os.path.join(invoice_dir, f"{os.path.splitext(uploaded_file.name)[0]}.png")
-                    combined_image.save(image_path)
-                    st.image(combined_image, caption=os.path.basename(image_path), use_column_width=True)
                 else:
                     image = Image.open(uploaded_file)
                     st.image(image, caption=uploaded_file.name, use_column_width=True)
@@ -339,15 +302,6 @@ def main():
                         image = txt_to_image(txt_path)
                         image_path = os.path.join(invoice_dir, f"{os.path.splitext(uploaded_file.name)[0]}.png")
                         image.save(image_path)
-                        output = process_invoice(image_path)
-                        json_output = json.loads(output)
-                        st.session_state.json_outputs[os.path.basename(image_path)] = json_output
-                    elif uploaded_file.name.endswith('.docx'):
-                        docx_path = os.path.join(invoice_dir, uploaded_file.name)
-                        images = docx_to_image(docx_path)
-                        combined_image = combine_images([Image.open(img) for img in images])
-                        image_path = os.path.join(invoice_dir, f"{os.path.splitext(uploaded_file.name)[0]}.png")
-                        combined_image.save(image_path)
                         output = process_invoice(image_path)
                         json_output = json.loads(output)
                         st.session_state.json_outputs[os.path.basename(image_path)] = json_output
