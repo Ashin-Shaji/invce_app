@@ -3,4 +3,4 @@ langchain-google-genai
 Pillow
 PyMuPDF
 python-docx 
-pdf2image
+docx2pdf
