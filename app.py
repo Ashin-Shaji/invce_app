@@ -461,8 +461,10 @@ def main():
     custom_font_path = os.path.join(font_dir, existing_fonts[0]) if existing_fonts else None
 
     if use_custom_font:
-        if custom_font_path:
-            st.write(f"Using existing custom font: {os.path.basename(custom_font_path)}")
+        if existing_fonts:
+            font_choice = st.radio("Choose a font", existing_fonts)
+            custom_font_path = os.path.join(font_dir, font_choice)
+            st.write(f"Using selected custom font: {font_choice}")
         uploaded_font = st.file_uploader("Upload a .ttf file for custom font", type=["ttf"])
         if uploaded_font:
             custom_font_path = os.path.join(font_dir, uploaded_font.name)
