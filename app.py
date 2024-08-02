@@ -451,7 +451,7 @@ def main():
         "Select an option:",
         ("Upload Invoice Images, PDFs, TXT Files", "Select Existing Images"))
 
-    use_custom_font = st.checkbox('Use different font')
+    use_custom_font = st.checkbox('Use custom font for txt to image')
 
     custom_font_path = None
 
@@ -467,12 +467,12 @@ def main():
             custom_font_path = os.path.join(font_dir, font_choice)
             st.write(f"Using selected custom font: {font_choice}")
         
-        uploaded_font = st.file_uploader("Upload a .ttf file for custom font", type=["ttf"])
+        uploaded_font = st.file_uploader("Upload .ttf for custom font", type=["ttf"])
         if uploaded_font:
             custom_font_path = os.path.join(font_dir, uploaded_font.name)
             with open(custom_font_path, "wb") as f:
                 f.write(uploaded_font.getbuffer())
-            st.write(f"Uploaded and using new custom font: {uploaded_font.name}")
+            st.write(f"Now using font: {uploaded_font.name}")
 
     if 'json_outputs' not in st.session_state:
         st.session_state.json_outputs = {}
