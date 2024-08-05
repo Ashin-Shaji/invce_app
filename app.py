@@ -454,19 +454,39 @@ def process_invoice(image_path):
     return response.content
 
 def convert_pdf_to_images_with_pymupdf(pdf_path, output_folder, zoom_x=2.0, zoom_y=2.0):
-    """Convert PDF pages to images with high resolution."""
+    """Convert PDF pages to images with high resolution and return a combined image."""
     doc = fitz.open(pdf_path)
-    image_paths = []
+    images = []
+
     for page_number in range(len(doc)):
         page = doc.load_page(page_number)
         mat = fitz.Matrix(zoom_x, zoom_y)
         pix = page.get_pixmap(matrix=mat, alpha=False)
-        unique_name = f'output_image_{int(time.time())}_{page_number + 1}.png'
-        image_path = os.path.join(output_folder, unique_name)
-        pix.save(image_path)
-        image_paths.append(image_path)
-        print(f'Generated image: {image_path}')
-    return image_paths
+
+        # Convert pixmap to PIL image
+        image = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+        images.append(image)
+
+    # Get the width and height of the combined image
+    total_width = max(image.width for image in images)
+    total_height = sum(image.height for image in images)
+
+    # Create a new blank image with the combined size
+    combined_image = Image.new('RGB', (total_width, total_height))
+
+    # Paste each page image into the combined image
+    y_offset = 0
+    for image in images:
+        combined_image.paste(image, (0, y_offset))
+        y_offset += image.height
+
+    # Save the combined image with the same name as the PDF file
+    pdf_filename = os.path.splitext(os.path.basename(pdf_path))[0]
+    combined_image_file = os.path.join(output_folder, f"{pdf_filename}.jpg")
+    combined_image.save(combined_image_file, quality=100)
+
+    print(f'Combined image saved as: {combined_image_file}')
+    return combined_image_file
 
 def convert_docx_to_images(docx_file, invoice_dir):
     """Convert DOCX file pages to high-quality images."""
