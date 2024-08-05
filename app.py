@@ -468,7 +468,7 @@ def convert_pdf_to_images_with_pymupdf(pdf_path, output_folder, zoom_x=2.0, zoom
         print(f'Generated image: {image_path}')
     return image_paths
 
-def convert_docx_to_images(docx_file):
+def convert_docx_to_images(docx_file, invoice_dir):
     """Convert DOCX file pages to high-quality images."""
     doc = aw.Document(docx_file)
     images = []
@@ -508,7 +508,7 @@ def convert_docx_to_images(docx_file):
 
     return combined_image_file
 
-def txt_to_image(txt_file, custom_font_path=None):
+def txt_to_image(txt_file, invoice_dir, custom_font_path=None):
     """Convert text file to a high-resolution image."""
     with open(txt_file, 'r') as f:
         text = f.read()
@@ -607,13 +607,13 @@ def main():
                     txt_path = os.path.join(invoice_dir, uploaded_file.name)
                     with open(txt_path, "wb") as f:
                         f.write(uploaded_file.getbuffer())
-                    image_path = txt_to_image(txt_path, custom_font_path)
+                    image_path = txt_to_image(txt_path, invoice_dir, custom_font_path)
                     st.image(image_path, caption=os.path.basename(image_path), use_column_width=True)
                 elif uploaded_file.name.endswith('.docx'):
                     docx_path = os.path.join(invoice_dir, uploaded_file.name)
                     with open(docx_path, "wb") as f:
                         f.write(uploaded_file.getbuffer())
-                    image_path = convert_docx_to_images(docx_path)
+                    image_path = convert_docx_to_images(docx_path, invoice_dir)
                     st.image(image_path, caption=os.path.basename(image_path), use_column_width=True)
                 else:
                     image = Image.open(uploaded_file)
@@ -632,13 +632,13 @@ def main():
                             st.session_state.json_outputs[os.path.basename(image_path)] = json_output
                     elif uploaded_file.name.endswith('.txt'):
                         txt_path = os.path.join(invoice_dir, uploaded_file.name)
-                        image_path = txt_to_image(txt_path, custom_font_path)
+                        image_path = txt_to_image(txt_path, invoice_dir, custom_font_path)
                         output = process_invoice(image_path)
                         json_output = json.loads(output)
                         st.session_state.json_outputs[os.path.basename(image_path)] = json_output
                     elif uploaded_file.name.endswith('.docx'):
                         docx_path = os.path.join(invoice_dir, uploaded_file.name)
-                        image_path = convert_docx_to_images(docx_path)
+                        image_path = convert_docx_to_images(docx_path, invoice_dir)
                         output = process_invoice(image_path)
                         json_output = json.loads(output)
                         st.session_state.json_outputs[os.path.basename(image_path)] = json_output
