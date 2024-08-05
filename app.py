@@ -412,32 +412,6 @@ st.markdown("""<style>
             margin: 0 auto;}</style>
         """, unsafe_allow_html=True)
 
-# Custom CSS to display radio options
-st.markdown("""
-    <style>
-    div[role="radiogroup"] > label > div {
-        display: flex;
-        flex-direction: row;
-    }
-    div[role="radiogroup"] > label > div > div {
-        margin-right: 10px;
-    }
-    </style>
-    <style>
-    div[role="radiogroup"] {
-        display: flex;
-        flex-direction: row;
-    }
-    div[role="radiogroup"] > label {
-        margin-right: 20px;
-    }
-    input[type="radio"]:div {
-        background-color: white;
-        border-color: lightblue;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
 def process_invoice(image_path):
     message = HumanMessage(
         content=[
@@ -576,8 +550,6 @@ def main():
 
     if 'json_outputs' not in st.session_state:
         st.session_state.json_outputs = {}
-    if 'invoice_images' not in st.session_state:
-        st.session_state.invoice_images = []
 
     invoice_dir = '/tmp/invoices/'
 
@@ -594,7 +566,6 @@ def main():
                     with open(pdf_path, "wb") as f:
                         f.write(uploaded_file.getbuffer())
                     combined_image_path = convert_pdf_to_images_with_pymupdf(pdf_path, invoice_dir)
-                    st.session_state.invoice_images.append(combined_image_path)
                     image = Image.open(combined_image_path)
                     st.image(image, caption=os.path.basename(combined_image_path), use_column_width=True)
                 
@@ -605,7 +576,6 @@ def main():
                     image = txt_to_image(txt_path, custom_font_path)
                     image_path = os.path.join(invoice_dir, f"{os.path.splitext(uploaded_file.name)[0]}.png")
                     image.save(image_path)
-                    st.session_state.invoice_images.append(image_path)
                     st.image(image, caption=os.path.basename(image_path), use_column_width=True)
 
                 elif uploaded_file.name.endswith('.docx'):
@@ -613,15 +583,15 @@ def main():
                     with open(docx_path, "wb") as f:
                         f.write(uploaded_file.getbuffer())
                     combined_image_path = convert_docx_to_images(docx_path, invoice_dir)
-                    st.session_state.invoice_images.append(combined_image_path)
                     image = Image.open(combined_image_path)
                     st.image(image, caption=os.path.basename(combined_image_path), use_column_width=True)
 
                 else:
                     image = Image.open(uploaded_file)
                     image_path = os.path.join(invoice_dir, uploaded_file.name)
-                    st.session_state.invoice_images.append(image_path)
                     st.image(image, caption=uploaded_file.name, use_column_width=True)
+                    with open(image_path, "wb") as f:
+                        f.write(uploaded_file.getbuffer())
 
             if st.button("Process All Uploaded Files"):
                 for uploaded_file in uploaded_files:
@@ -670,13 +640,6 @@ def main():
                     output = process_invoice(image_path)
                     json_output = json.loads(output)
                     st.session_state.json_outputs[selected_image] = json_output
-
-    # Show all generated invoice images in an expander
-    with st.expander("Show All Invoices"):
-        for image_path in st.session_state.invoice_images:
-            if os.path.exists(image_path):
-                image = Image.open(image_path)
-                st.image(image, caption=os.path.basename(image_path), use_column_width=True)
 
     # Display JSON outputs with expanders and individual download buttons
     if st.session_state.json_outputs:
