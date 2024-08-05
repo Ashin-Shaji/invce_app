@@ -555,7 +555,7 @@ def main():
                         st.image(image_path, caption=os.path.basename(image_path), use_column_width=True)
                 elif uploaded_file.name.endswith('.txt'):
                     txt_path = os.path.join(invoice_dir, uploaded_file.name)
-                    with open(txt_path, "wb") as f:
+                    with open(txt_path, "r") as f:
                         f.write(uploaded_file.getbuffer())
                     image = txt_to_image(txt_path, custom_font_path)
                     image_path = os.path.join(invoice_dir, f"{os.path.splitext(uploaded_file.name)[0]}.png")
