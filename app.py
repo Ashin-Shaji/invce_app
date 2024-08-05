@@ -542,17 +542,15 @@ def main():
                     with open(pdf_path, "wb") as f:
                         f.write(uploaded_file.getbuffer())
                     image_paths = convert_pdf_to_images_with_pymupdf(pdf_path)
-                    for image_path in image_paths:
-                        st.image(image_path, caption=os.path.basename(image_path), use_column_width=True)
+                    for image in image_paths:
+                        st.image(image, caption=os.path.basename(pdf_path), use_column_width=True)
                 elif uploaded_file.name.endswith('.docx'):
                     docx_path = os.path.join(invoice_dir, uploaded_file.name)
                     with open(docx_path, "wb") as f:
                         f.write(uploaded_file.getbuffer())
                     images = docx_to_image(docx_path, custom_font_path)  # Pass the custom font path
                     for image in images:
-                        image_path = os.path.join(invoice_dir, f"{os.path.splitext(uploaded_file.name)[0]}.png")
-                        image.save(image_path)
-                        st.image(image_path, caption=os.path.basename(image_path), use_column_width=True)
+                        st.image(image, caption=os.path.basename(docx_path), use_column_width=True)
                 elif uploaded_file.name.endswith('.txt'):
                     txt_path = os.path.join(invoice_dir, uploaded_file.name)
                     with open(txt_path, "wb") as f:
@@ -560,9 +558,7 @@ def main():
                     with open(txt_path, "r") as f:  # Read the content of the text file
                         text_content = f.read()
                     image = txt_to_image(text_content, custom_font_path)  # Pass the content to txt_to_image
-                    image_path = os.path.join(invoice_dir, f"{os.path.splitext(uploaded_file.name)[0]}.png")
-                    image.save(image_path)
-                    st.image(image_path, caption=os.path.basename(image_path), use_column_width=True)
+                    st.image(image, caption=os.path.basename(txt_path), use_column_width=True)
                 else:
                     image = Image.open(uploaded_file)
                     st.image(image, caption=uploaded_file.name, use_column_width=True)
@@ -574,7 +570,7 @@ def main():
                     if uploaded_file.name.endswith('.pdf'):
                         pdf_path = os.path.join(invoice_dir, uploaded_file.name)
                         image_paths = convert_pdf_to_images_with_pymupdf(pdf_path)
-                        for image_path in image_paths:
+                        for image in image_paths:
                             output = process_invoice(image_path)
                             json_output = json.loads(output)
                             st.session_state.json_outputs[os.path.basename(image_path)] = json_output
