@@ -155,225 +155,6 @@
 #     main()
 
 #2
-# import streamlit as st
-# from langchain_core.messages import HumanMessage
-# from langchain_google_genai import ChatGoogleGenerativeAI
-# from PIL import Image, ImageDraw, ImageFont
-# import os, fitz
-# import json, time
-# from docx import Document
-
-# os.environ["GOOGLE_API_KEY"] = 'AIzaSyBbepUh8x3CqpkxNFnJ1IX0dFc0UNTwwbU'
-
-# # Initialize the ChatGoogleGenerativeAI model
-# llm = ChatGoogleGenerativeAI(model="gemini-1.5-pro-latest")
-
-# st.markdown("""<style>
-#         .stButton > button {
-#             display: block;
-#             margin: 0 auto;}</style>
-#         """, unsafe_allow_html=True) 
-
-# # Custom CSS to display radio options
-# st.markdown("""
-#     <style>
-#     div[role="radiogroup"] > label > div {
-#         display: flex;
-#         flex-direction: row;
-#     }
-#     div[role="radiogroup"] > label > div > div {
-#         margin-right: 10px;
-#     }
-#     </style>
-#     <style>
-#     div[role="radiogroup"] {
-#         display: flex;
-#         flex-direction: row;
-#     }
-#     div[role="radiogroup"] > label {
-#         margin-right: 20px;
-#     }
-#     input[type="radio"]:div {
-#         background-color: white;
-#         border-color: lightblue;
-#     }
-#     </style>
-# """, unsafe_allow_html=True)
-
-# def process_invoice(image_path):
-#     message = HumanMessage(
-#         content=[
-#             {
-#                 "type": "text",
-#                 "text": """You will carefully analyze the invoice only and get the output in pure json within a python list format with relevant details
-#                 with invoice id as default ino [{}], your response shall not contain ' ```python ' and ' ``` '
-#                         """,
-#             },
-#             {"type": "image_url", "image_url": image_path}
-#         ]
-#     )
-#     response = llm.invoke([message])
-#     return response.content
-
-# def convert_pdf_to_images_with_pymupdf(pdf_path, output_folder, zoom_x=2.0, zoom_y=2.0):
-#     doc = fitz.open(pdf_path)
-#     image_paths = []
-#     for page_number in range(len(doc)):
-#         page = doc.load_page(page_number)
-#         mat = fitz.Matrix(zoom_x, zoom_y)
-#         pix = page.get_pixmap(matrix=mat)
-#         unique_name = f'output_image_{int(time.time())}_{page_number + 1}.png'
-#         image_path = os.path.join(output_folder, unique_name)
-#         pix.save(image_path)
-#         image_paths.append(image_path)
-#         print(f'Generated image: {image_path}')
-#     return image_paths
-
-# def txt_to_image(txt_file, custom_font_path=None):
-#     with open(txt_file, 'r') as f:
-#         text = f.read()
-    
-#     # Create a new image with higher resolution
-#     image = Image.new('RGB', (1600, 1200), color=(255, 255, 255))
-#     draw = ImageDraw.Draw(image)
-
-#     # Use the custom font if provided, else fallback to default
-#     if custom_font_path:
-#         try:
-#             font = ImageFont.truetype(custom_font_path, 24)
-#         except IOError:
-#             font = ImageFont.load_default()
-#     else:
-#         font = ImageFont.load_default()
-
-#     # Draw the text on the image
-#     draw.text((10, 10), text, font=font, fill=(0, 0, 0))
-    
-#     return image
-
-# def main():
-#     st.title("Invoice Data Analyzer")
-
-#     option = st.radio(
-#         "Select an option:",
-#         ("Upload Invoice Images, PDFs, TXT Files", "Select Existing Images"))
-
-#     use_custom_font = st.checkbox('Use custom font for txt to image')
-
-#     custom_font_path = None
-
-#     if use_custom_font:
-#         font_dir = '/tmp/fonts/'
-#         if not os.path.exists(font_dir):
-#             os.makedirs(font_dir)
-
-#         existing_fonts = [f for f in os.listdir(font_dir) if f.endswith('.ttf')]
-
-#         if existing_fonts:
-#             font_choice = st.radio("Choose a font", existing_fonts)
-#             custom_font_path = os.path.join(font_dir, font_choice)
-#             st.write(f"Now using font: {font_choice}")
-        
-#         uploaded_font = st.file_uploader("Upload .ttf for custom font", type=["ttf"])
-#         if uploaded_font:
-#             custom_font_path = os.path.join(font_dir, uploaded_font.name)
-#             with open(custom_font_path, "wb") as f:
-#                 f.write(uploaded_font.getbuffer())
-#             st.write(f"Now using font: {uploaded_font.name}")
-
-#     if 'json_outputs' not in st.session_state:
-#         st.session_state.json_outputs = {}
-
-#     invoice_dir = '/tmp/invoices/'
-
-#     # Create the directory if it doesn't exist
-#     if not os.path.exists(invoice_dir):
-#         os.makedirs(invoice_dir)
-
-#     if option == "Upload Invoice Images, PDFs, TXT Files":
-#         uploaded_files = st.file_uploader("Choose images, PDFs, TXT files...", type=["jpg", "jpeg", "png", "pdf", "txt"], accept_multiple_files=True)
-#         if uploaded_files:
-#             for uploaded_file in uploaded_files:
-#                 if uploaded_file.name.endswith('.pdf'):
-#                     pdf_path = os.path.join(invoice_dir, uploaded_file.name)
-#                     with open(pdf_path, "wb") as f:
-#                         f.write(uploaded_file.getbuffer())
-#                     image_paths = convert_pdf_to_images_with_pymupdf(pdf_path, invoice_dir)
-#                     for image_path in image_paths:
-#                         image = Image.open(image_path)
-#                         st.image(image, caption=os.path.basename(image_path), use_column_width=True)
-#                 elif uploaded_file.name.endswith('.txt'):
-#                     txt_path = os.path.join(invoice_dir, uploaded_file.name)
-#                     with open(txt_path, "wb") as f:
-#                         f.write(uploaded_file.getbuffer())
-#                     image = txt_to_image(txt_path, custom_font_path)
-#                     image_path = os.path.join(invoice_dir, f"{os.path.splitext(uploaded_file.name)[0]}.png")
-#                     image.save(image_path)
-#                     st.image(image, caption=os.path.basename(image_path), use_column_width=True)
-#                 else:
-#                     image = Image.open(uploaded_file)
-#                     st.image(image, caption=uploaded_file.name, use_column_width=True)
-#                     with open(os.path.join(invoice_dir, uploaded_file.name), "wb") as f:
-#                         f.write(uploaded_file.getbuffer())
-
-#             if st.button("Process All Uploaded Files"):
-#                 for uploaded_file in uploaded_files:
-#                     if uploaded_file.name.endswith('.pdf'):
-#                         pdf_path = os.path.join(invoice_dir, uploaded_file.name)
-#                         image_paths = convert_pdf_to_images_with_pymupdf(pdf_path, invoice_dir)
-#                         for image_path in image_paths:
-#                             output = process_invoice(image_path)
-#                             json_output = json.loads(output)
-#                             st.session_state.json_outputs[os.path.basename(image_path)] = json_output
-#                     elif uploaded_file.name.endswith('.txt'):
-#                         txt_path = os.path.join(invoice_dir, uploaded_file.name)
-#                         image = txt_to_image(txt_path, custom_font_path)
-#                         image_path = os.path.join(invoice_dir, f"{os.path.splitext(uploaded_file.name)[0]}.png")
-#                         image.save(image_path)
-#                         output = process_invoice(image_path)
-#                         json_output = json.loads(output)
-#                         st.session_state.json_outputs[os.path.basename(image_path)] = json_output
-#                     else:
-#                         image_path = os.path.join(invoice_dir, uploaded_file.name)
-#                         output = process_invoice(image_path)
-#                         json_output = json.loads(output)
-#                         st.session_state.json_outputs[uploaded_file.name] = json_output
-
-#     elif option == "Select Existing Images":
-#         image_files = [f for f in os.listdir(invoice_dir) if f.endswith(('.jpg', '.jpeg', '.png'))]
-#         selected_images = st.multiselect("Select images", image_files)
-        
-#         if selected_images:
-#             for selected_image in selected_images:
-#                 image_path = os.path.join(invoice_dir, selected_image)
-#                 image = Image.open(image_path)
-#                 st.image(image, caption=selected_image, use_column_width=True)
-                
-#             if st.button("Process All Selected Images"):
-#                 for selected_image in selected_images:
-#                     image_path = os.path.join(invoice_dir, selected_image)
-#                     output = process_invoice(image_path)
-#                     json_output = json.loads(output)
-#                     st.session_state.json_outputs[selected_image] = json_output
-
-#     # Display JSON outputs with expanders and individual download buttons
-#     if st.session_state.json_outputs:
-#         for image_name, json_output in st.session_state.json_outputs.items():
-#             with st.expander(f"JSON Output for {image_name}"):
-#                 st.json(json_output)
-#                 json_str = json.dumps(json_output, indent=4)
-#                 st.download_button(
-#                     label=f"Download JSON for {image_name}",
-#                     data=json_str,
-#                     file_name=f"{image_name}_output.json",
-#                     mime="application/json",
-#                     key=f"download-{image_name}"  # Ensure unique key for each download button
-#                 )
-
-# if __name__ == "__main__":
-#     main()
-
-#3
 import streamlit as st
 from langchain_core.messages import HumanMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -381,8 +162,6 @@ from PIL import Image, ImageDraw, ImageFont
 import os, fitz
 import json, time
 from docx import Document
-import io
-import aspose.words as aw
 
 os.environ["GOOGLE_API_KEY"] = 'AIzaSyBbepUh8x3CqpkxNFnJ1IX0dFc0UNTwwbU'
 
@@ -436,44 +215,24 @@ def process_invoice(image_path):
     response = llm.invoke([message])
     return response.content
 
-def convert_pdf_to_images_with_pymupdf(pdf_path, zoom_x=2.0, zoom_y=2.0):
+def convert_pdf_to_images_with_pymupdf(pdf_path, output_folder, zoom_x=2.0, zoom_y=2.0):
     doc = fitz.open(pdf_path)
-    images = []
+    image_paths = []
     for page_number in range(len(doc)):
         page = doc.load_page(page_number)
         mat = fitz.Matrix(zoom_x, zoom_y)
         pix = page.get_pixmap(matrix=mat)
-        img = Image.open(io.BytesIO(pix.tobytes()))
-        images.append(img)
-    return images
+        unique_name = f'output_image_{int(time.time())}_{page_number + 1}.png'
+        image_path = os.path.join(output_folder, unique_name)
+        pix.save(image_path)
+        image_paths.append(image_path)
+        print(f'Generated image: {image_path}')
+    return image_paths
 
-def docx_to_image(docx_file, custom_font_path=None):
-    # Load the DOCX file
-    document = Document(docx_file)
-    full_text = []
+def txt_to_image(txt_file, custom_font_path=None):
+    with open(txt_file, 'r') as f:
+        text = f.read()
     
-    for para in document.paragraphs:
-        full_text.append(para.text)
-
-    text = "\n".join(full_text)
-
-    # Create an image from the text
-    image = txt_to_image(text, custom_font_path)
-    
-    return [image]  # Return a list of images, though here it's just one
-
-def combine_images(images):
-    widths, heights = zip(*(i.size for i in images))
-    total_height = sum(heights)
-    max_width = max(widths)
-    combined_image = Image.new('RGB', (max_width, total_height))
-    y_offset = 0
-    for img in images:
-        combined_image.paste(img, (0, y_offset))
-        y_offset += img.height
-    return combined_image
-
-def txt_to_image(text, custom_font_path=None):
     # Create a new image with higher resolution
     image = Image.new('RGB', (1600, 1200), color=(255, 255, 255))
     draw = ImageDraw.Draw(image)
@@ -497,32 +256,30 @@ def main():
 
     option = st.radio(
         "Select an option:",
-        ("Upload Invoice Images, PDFs, DOCX, TXT Files", "Select Existing Images"))
+        ("Upload Invoice Images, PDFs, TXT Files", "Select Existing Images"))
 
-    # Custom font selection only in the upload section
+    use_custom_font = st.checkbox('Use custom font for txt to image')
+
     custom_font_path = None
 
-    if option == "Upload Invoice Images, PDFs, DOCX, TXT Files":
-        use_custom_font = st.checkbox('Use different font')
+    if use_custom_font:
+        font_dir = '/tmp/fonts/'
+        if not os.path.exists(font_dir):
+            os.makedirs(font_dir)
 
-        if use_custom_font:
-            font_dir = '/tmp/fonts/'
-            if not os.path.exists(font_dir):
-                os.makedirs(font_dir)
+        existing_fonts = [f for f in os.listdir(font_dir) if f.endswith('.ttf')]
 
-            existing_fonts = [f for f in os.listdir(font_dir) if f.endswith('.ttf')]
-
-            if existing_fonts:
-                font_choice = st.radio("Choose a font", existing_fonts)
-                custom_font_path = os.path.join(font_dir, font_choice)
-                st.write(f"Using selected custom font: {font_choice}")
-            
-            uploaded_font = st.file_uploader("Upload a .ttf file for custom font", type=["ttf"])
-            if uploaded_font:
-                custom_font_path = os.path.join(font_dir, uploaded_font.name)
-                with open(custom_font_path, "wb") as f:
-                    f.write(uploaded_font.getbuffer())
-                st.write(f"Uploaded and using new custom font: {uploaded_font.name}")
+        if existing_fonts:
+            font_choice = st.radio("Choose a font", existing_fonts)
+            custom_font_path = os.path.join(font_dir, font_choice)
+            st.write(f"Now using font: {font_choice}")
+        
+        uploaded_font = st.file_uploader("Upload .ttf for custom font", type=["ttf"])
+        if uploaded_font:
+            custom_font_path = os.path.join(font_dir, uploaded_font.name)
+            with open(custom_font_path, "wb") as f:
+                f.write(uploaded_font.getbuffer())
+            st.write(f"Now using font: {uploaded_font.name}")
 
     if 'json_outputs' not in st.session_state:
         st.session_state.json_outputs = {}
@@ -533,68 +290,46 @@ def main():
     if not os.path.exists(invoice_dir):
         os.makedirs(invoice_dir)
 
-    if option == "Upload Invoice Images, PDFs, DOCX, TXT Files":
-        uploaded_files = st.file_uploader("Choose images, PDFs, DOCX, TXT files...", type=["jpg", "jpeg", "png", "pdf", "docx", "txt"], accept_multiple_files=True)
+    if option == "Upload Invoice Images, PDFs, TXT Files":
+        uploaded_files = st.file_uploader("Choose images, PDFs, TXT files...", type=["jpg", "jpeg", "png", "pdf", "txt"], accept_multiple_files=True)
         if uploaded_files:
             for uploaded_file in uploaded_files:
                 if uploaded_file.name.endswith('.pdf'):
                     pdf_path = os.path.join(invoice_dir, uploaded_file.name)
                     with open(pdf_path, "wb") as f:
                         f.write(uploaded_file.getbuffer())
-                    images = convert_pdf_to_images_with_pymupdf(pdf_path)
-                    for idx, image in enumerate(images):
-                        image_path = f"{pdf_path}_{idx}.png"  # Assign image_path here
-                        image.save(image_path)
-                        st.image(image, caption=os.path.basename(image_path), use_column_width=True)
-                elif uploaded_file.name.endswith('.docx'):
-                    docx_path = os.path.join(invoice_dir, uploaded_file.name)
-                    with open(docx_path, "wb") as f:
-                        f.write(uploaded_file.getbuffer())
-                    images = docx_to_image(docx_path, custom_font_path)  # Pass the custom font path
-                    for idx, image in enumerate(images):
-                        image_path = f"{docx_path}_{idx}.png"  # Assign image_path here
-                        image.save(image_path)
+                    image_paths = convert_pdf_to_images_with_pymupdf(pdf_path, invoice_dir)
+                    for image_path in image_paths:
+                        image = Image.open(image_path)
                         st.image(image, caption=os.path.basename(image_path), use_column_width=True)
                 elif uploaded_file.name.endswith('.txt'):
                     txt_path = os.path.join(invoice_dir, uploaded_file.name)
                     with open(txt_path, "wb") as f:
                         f.write(uploaded_file.getbuffer())
-                    with open(txt_path, "r") as f:  # Read the content of the text file
-                        text_content = f.read()
-                    image = txt_to_image(text_content, custom_font_path)  # Pass the content to txt_to_image
-                    image_path = f"{txt_path}.png"  # Assign image_path here
+                    image = txt_to_image(txt_path, custom_font_path)
+                    image_path = os.path.join(invoice_dir, f"{os.path.splitext(uploaded_file.name)[0]}.png")
                     image.save(image_path)
                     st.image(image, caption=os.path.basename(image_path), use_column_width=True)
                 else:
                     image = Image.open(uploaded_file)
-                    image_path = os.path.join(invoice_dir, uploaded_file.name)  # Assign image_path here
-                    image.save(image_path)
                     st.image(image, caption=uploaded_file.name, use_column_width=True)
+                    with open(os.path.join(invoice_dir, uploaded_file.name), "wb") as f:
+                        f.write(uploaded_file.getbuffer())
 
             if st.button("Process All Uploaded Files"):
                 for uploaded_file in uploaded_files:
                     if uploaded_file.name.endswith('.pdf'):
                         pdf_path = os.path.join(invoice_dir, uploaded_file.name)
-                        images = convert_pdf_to_images_with_pymupdf(pdf_path)
-                        for idx, image in enumerate(images):
-                            image_path = f"{pdf_path}_{idx}.png"
-                            output = process_invoice(image_path)
-                            json_output = json.loads(output)
-                            st.session_state.json_outputs[os.path.basename(image_path)] = json_output
-                    elif uploaded_file.name.endswith('.docx'):
-                        docx_path = os.path.join(invoice_dir, uploaded_file.name)
-                        images = docx_to_image(docx_path, custom_font_path)
-                        for idx, image in enumerate(images):
-                            image_path = f"{docx_path}_{idx}.png"
+                        image_paths = convert_pdf_to_images_with_pymupdf(pdf_path, invoice_dir)
+                        for image_path in image_paths:
                             output = process_invoice(image_path)
                             json_output = json.loads(output)
                             st.session_state.json_outputs[os.path.basename(image_path)] = json_output
                     elif uploaded_file.name.endswith('.txt'):
                         txt_path = os.path.join(invoice_dir, uploaded_file.name)
-                        with open(txt_path, "r") as f:
-                            text_content = f.read()
-                        image = txt_to_image(text_content, custom_font_path)
-                        image_path = f"{txt_path}.png"
+                        image = txt_to_image(txt_path, custom_font_path)
+                        image_path = os.path.join(invoice_dir, f"{os.path.splitext(uploaded_file.name)[0]}.png")
+                        image.save(image_path)
                         output = process_invoice(image_path)
                         json_output = json.loads(output)
                         st.session_state.json_outputs[os.path.basename(image_path)] = json_output
@@ -602,18 +337,40 @@ def main():
                         image_path = os.path.join(invoice_dir, uploaded_file.name)
                         output = process_invoice(image_path)
                         json_output = json.loads(output)
-                        st.session_state.json_outputs[os.path.basename(image_path)] = json_output
+                        st.session_state.json_outputs[uploaded_file.name] = json_output
 
     elif option == "Select Existing Images":
-        # Placeholder for selecting existing images
-        st.write("Feature coming soon...")
+        image_files = [f for f in os.listdir(invoice_dir) if f.endswith(('.jpg', '.jpeg', '.png'))]
+        selected_images = st.multiselect("Select images", image_files)
+        
+        if selected_images:
+            for selected_image in selected_images:
+                image_path = os.path.join(invoice_dir, selected_image)
+                image = Image.open(image_path)
+                st.image(image, caption=selected_image, use_column_width=True)
+                
+            if st.button("Process All Selected Images"):
+                for selected_image in selected_images:
+                    image_path = os.path.join(invoice_dir, selected_image)
+                    output = process_invoice(image_path)
+                    json_output = json.loads(output)
+                    st.session_state.json_outputs[selected_image] = json_output
 
-    # Display the JSON outputs
+    # Display JSON outputs with expanders and individual download buttons
     if st.session_state.json_outputs:
-        st.subheader("Extracted Invoice Data")
-        for filename, json_output in st.session_state.json_outputs.items():
-            st.write(f"File: {filename}")
-            st.json(json_output)
+        for image_name, json_output in st.session_state.json_outputs.items():
+            with st.expander(f"JSON Output for {image_name}"):
+                st.json(json_output)
+                json_str = json.dumps(json_output, indent=4)
+                st.download_button(
+                    label=f"Download JSON for {image_name}",
+                    data=json_str,
+                    file_name=f"{image_name}_output.json",
+                    mime="application/json",
+                    key=f"download-{image_name}"  # Ensure unique key for each download button
+                )
 
 if __name__ == "__main__":
     main()
+
+
