@@ -172,7 +172,7 @@ st.markdown("""<style>
         .stButton > button {
             display: block;
             margin: 0 auto;}</style>
-        """, unsafe_allow_html=True) 
+        """, unsafe_allow_html=True)
 
 # Custom CSS to display radio options
 st.markdown("""
@@ -232,7 +232,7 @@ def convert_pdf_to_images_with_pymupdf(pdf_path, output_folder, zoom_x=2.0, zoom
 def txt_to_image(txt_file, custom_font_path=None):
     with open(txt_file, 'r') as f:
         text = f.read()
-    
+
     # Create a new image with higher resolution
     image = Image.new('RGB', (1600, 1200), color=(255, 255, 255))
     draw = ImageDraw.Draw(image)
@@ -248,8 +248,20 @@ def txt_to_image(txt_file, custom_font_path=None):
 
     # Draw the text on the image
     draw.text((10, 10), text, font=font, fill=(0, 0, 0))
-    
+
     return image
+
+def clear_invoice_dir(invoice_dir):
+    """Clear all files in the specified directory."""
+    for filename in os.listdir(invoice_dir):
+        file_path = os.path.join(invoice_dir, filename)
+        try:
+            if os.path.isfile(file_path):
+                os.unlink(file_path)  # Remove file
+            elif os.path.isdir(file_path):
+                os.rmdir(file_path)  # Remove directory if it's empty
+        except Exception as e:
+            print(f'Failed to delete {file_path}. Reason: {e}')
 
 def main():
     st.title("Invoice Data Analyzer")
@@ -273,7 +285,7 @@ def main():
             font_choice = st.radio("Choose a font", existing_fonts)
             custom_font_path = os.path.join(font_dir, font_choice)
             st.write(f"Now using font: {font_choice}")
-        
+
         uploaded_font = st.file_uploader("Upload .ttf for custom font", type=["ttf"])
         if uploaded_font:
             custom_font_path = os.path.join(font_dir, uploaded_font.name)
@@ -289,6 +301,11 @@ def main():
     # Create the directory if it doesn't exist
     if not os.path.exists(invoice_dir):
         os.makedirs(invoice_dir)
+
+    # Button to clear the invoice directory
+    if st.button("Clear Invoice Directory"):
+        clear_invoice_dir(invoice_dir)
+        st.success("Invoice directory cleared!")
 
     if option == "Upload Invoice Images, PDFs, TXT Files":
         uploaded_files = st.file_uploader("Choose images, PDFs, TXT files...", type=["jpg", "jpeg", "png", "pdf", "txt"], accept_multiple_files=True)
@@ -342,13 +359,13 @@ def main():
     elif option == "Select Existing Images":
         image_files = [f for f in os.listdir(invoice_dir) if f.endswith(('.jpg', '.jpeg', '.png'))]
         selected_images = st.multiselect("Select images", image_files)
-        
+
         if selected_images:
             for selected_image in selected_images:
                 image_path = os.path.join(invoice_dir, selected_image)
                 image = Image.open(image_path)
                 st.image(image, caption=selected_image, use_column_width=True)
-                
+
             if st.button("Process All Selected Images"):
                 for selected_image in selected_images:
                     image_path = os.path.join(invoice_dir, selected_image)
@@ -372,5 +389,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
 
