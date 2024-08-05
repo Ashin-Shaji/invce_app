@@ -817,9 +817,9 @@ def main():
                         st.image(image_path, caption=os.path.basename(image_path), use_column_width=True)
                 elif uploaded_file.name.endswith('.txt'):
                     txt_path = os.path.join(invoice_dir, uploaded_file.name)
-                    with open(txt_path, "wb") as f:
-                        f.write(uploaded_file.getbuffer())
-                    image = txt_to_image(txt_path, custom_font_path)
+                    with open(txt_path, "r") as f:  # Read the content of the text file
+                        text_content = f.read()
+                    image = txt_to_image(text_content, custom_font_path)  # Pass the content to txt_to_image
                     image_path = os.path.join(invoice_dir, f"{os.path.splitext(uploaded_file.name)[0]}.png")
                     image.save(image_path)
                     st.image(image_path, caption=os.path.basename(image_path), use_column_width=True)
@@ -849,7 +849,9 @@ def main():
                             st.session_state.json_outputs[os.path.basename(image_path)] = json_output
                     elif uploaded_file.name.endswith('.txt'):
                         txt_path = os.path.join(invoice_dir, uploaded_file.name)
-                        image = txt_to_image(txt_path, custom_font_path)
+                        with open(txt_path, "r") as f:  # Read the content of the text file
+                            text_content = f.read()
+                        image = txt_to_image(text_content, custom_font_path)  # Pass the content to txt_to_image
                         image_path = os.path.join(invoice_dir, f"{os.path.splitext(uploaded_file.name)[0]}.png")
                         image.save(image_path)
                         output = process_invoice(image_path)
