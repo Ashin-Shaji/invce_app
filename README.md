@@ -105,14 +105,16 @@ graph TD
 
     Download --> End((End))
 
-    %% Styling
+    %% Updated Styling
     style Start fill:#f9f,stroke:#333,stroke-width:2px
     style End fill:#f9f,stroke:#333,stroke-width:2px
     style AI_Engine fill:#e1f5fe,stroke:#01579b
     style Pre_Processing fill:#fff3e0,stroke:#ef6c00
-    style PyMuPDF fill:#ffcc80
-    style Aspose fill:#ffcc80
-    style DrawText fill:#ffcc80
+    
+    %% Target Nodes with Black Background and White Text
+    style PyMuPDF fill:#000,color:#fff,stroke:#333
+    style Aspose fill:#000,color:#fff,stroke:#333
+    style DrawText fill:#000,color:#fff,stroke:#333
 ```
     
 ### Prompt Guardrails
