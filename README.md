@@ -64,7 +64,55 @@ for image in images:
     combined_image.paste(image, (0, y_offset))
     y_offset += image.height
 ```
+##Logic Workflow
+graph TD
+    %% Entry and Configuration
+    Start((Start)) --> Config[Set API Key & Initialize Gemini 1.5 Pro]
+    Config --> UI_Select{UI: Choose Input Option}
 
+    %% Input Processing
+    subgraph File_Ingestion [Multi-Format File Ingestion]
+    UI_Select -->|Upload Files| Uploader[Streamlit File Uploader<br/>JPG, PNG, PDF, TXT, DOCX]
+    UI_Select -->|Existing| Dir_Check[Read from /tmp/invoices/]
+    end
+
+    %% Conversion Pipeline
+    subgraph Pre_Processing [Pre-Processing Pipeline]
+    Uploader --> Format_Check{File Extension?}
+    
+    Format_Check -->|.pdf| PyMuPDF[PyMuPDF: Convert Pages<br/>to High-Res PNG]
+    Format_Check -->|.docx| Aspose[Aspose.Words: Convert Pages<br/>to Combined JPG]
+    Format_Check -->|.txt| DrawText[PIL: Render Text to Image<br/>Optional Custom TTF Font]
+    Format_Check -->|Image| Native[Open PIL Image directly]
+    end
+
+    %% AI Analysis
+    Pre_Processing --> Trigger_AI{Click 'Process All'}
+    
+    subgraph AI_Engine [Gemini Vision Engine]
+    Trigger_AI --> LangChain[LangChain: HumanMessage<br/>Image + JSON Prompt]
+    LangChain --> Gemini[Gemini 1.5 Pro Vision<br/>Analyze & Extract]
+    Gemini --> Raw_JSON[Receive Pure JSON String]
+    end
+
+    %% State and Output
+    subgraph Output_Management [Data & UI State]
+    Raw_JSON --> Session[Update st.session_state.json_outputs]
+    Session --> UI_Display[Render Expanders with st.json]
+    UI_Display --> Download[Download Button per File<br/>Mime: application/json]
+    end
+
+    Download --> End((End))
+
+    %% Styling
+    style Start fill:#f9f,stroke:#333,stroke-width:2px
+    style End fill:#f9f,stroke:#333,stroke-width:2px
+    style AI_Engine fill:#e1f5fe,stroke:#01579b
+    style Pre_Processing fill:#fff3e0,stroke:#ef6c00
+    style PyMuPDF fill:#ffcc80
+    style Aspose fill:#ffcc80
+    style DrawText fill:#ffcc80
+    
 ### Prompt Guardrails
 The application uses a **Negative Constraint** in its prompt to prevent the LLM from wrapping the output in Markdown blocks:
 > *"Your response shall not contain ' ```python ' and ' ``` ' ... get the output in pure json"*
