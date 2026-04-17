@@ -401,7 +401,7 @@ import os, fitz
 import json, time
 from docx import Document
 
-os.environ["GOOGLE_API_KEY"] = 'AIzaSyBbepUh8x3CqpkxNFnJ1IX0dFc0UNTwwbU'
+os.environ["GOOGLE_API_KEY"] = 
 
 # Initialize the ChatGoogleGenerativeAI model
 llm = ChatGoogleGenerativeAI(model="gemini-1.5-pro-latest")
