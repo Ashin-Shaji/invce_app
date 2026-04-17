@@ -64,7 +64,8 @@ for image in images:
     combined_image.paste(image, (0, y_offset))
     y_offset += image.height
 ```
-##Logic Workflow
+## Logic Flowchart
+```mermaid
 graph TD
     %% Entry and Configuration
     Start((Start)) --> Config[Set API Key & Initialize Gemini 1.5 Pro]
@@ -112,6 +113,7 @@ graph TD
     style PyMuPDF fill:#ffcc80
     style Aspose fill:#ffcc80
     style DrawText fill:#ffcc80
+```
     
 ### Prompt Guardrails
 The application uses a **Negative Constraint** in its prompt to prevent the LLM from wrapping the output in Markdown blocks:
